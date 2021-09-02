@@ -1,0 +1,47 @@
+---
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: engagements
+spec:
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+    - name: default
+      config:
+        node.roles:
+          - master
+          - data
+          - ingest
+        node.attr.attr_name: attr_value
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 50Gi
+            storageClassName: gp2
+      podTemplate:
+        metadata:
+          labels:
+            app: address
+        spec:
+          containers:
+            - name: elasticsearch
+              env:
+              - name: ES_JAVA_OPTS
+                value: -Xms3g -Xmx3g
+              resources:
+                requests:
+                  memory: 4Gi
+                  cpu: 1
+                limits:
+                  memory: 4Gi
+                  cpu: 2
+      count: 1
+  version: 7.14.0

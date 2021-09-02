@@ -1,0 +1,6 @@
+namespace: engagements-dev
+
+resources:
+- elastic-cr.yaml
+- kibana-cr.yaml
+- routes.yaml
