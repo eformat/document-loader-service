@@ -37,6 +37,11 @@ kustomize build elastic/operator | oc apply -f-
 kustomize build elastic | oc apply -f-
 ```
 
+To Login to Kibana password (user is `elastic`)
+```bash
+echo $(oc get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d)
+```
+
 Create Secrets
 ```bash
 oc -n engagements-dev create secret generic secret-document-loader-service-proxy --from-literal=session_secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c43)
