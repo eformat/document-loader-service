@@ -16,7 +16,7 @@ public class DocumentLoader extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        from("file://".concat(downloadFolder) + "?synchronous=true&delete=true&readLock=fileLock&delay=1000&include=.*.docx|.*.pdf")
+        from("file://".concat(downloadFolder) + "?synchronous=true&delete=true&readLock=fileLock&delay=3000&include=.*.docx|.*.pdf")
                 .routeId("file-poller")
                 .setHeader("component").constant("elasticsearch-rest-quarkus")
                 .process(new DocumentElasticConverter())
