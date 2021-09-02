@@ -128,6 +128,8 @@ spec:
               name: secret-document-loader-service-tls
             - mountPath: /etc/proxy/secrets
               name: secret-document-loader-service-proxy
+            - mountPath: /mnt
+              name: cache-volume
       serviceAccountName: {{ include "document-loader-service.fullname" . }}
       volumes:
         - name: secret-document-loader-service-tls
@@ -138,6 +140,8 @@ spec:
           secret:
             defaultMode: 420
             secretName: secret-document-loader-service-proxy
+        - name: cache-volume
+          emptyDir: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
