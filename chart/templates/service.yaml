@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "document-loader-service.labels" . | nindent 4 }}
   annotations:
-    service.alpha.openshift.io/serving-cert-secret-name: document-loader-service-admin-tls
+    service.alpha.openshift.io/serving-cert-secret-name: secret-document-loader-service-tls
 spec:
   ports:
     - name: proxy

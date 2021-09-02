@@ -23,3 +23,22 @@ curl -vvv http://localhost:8080/gdrive/exportFile?fileId=1WIDbZg7VN8N97P_0hU5JD8
 # export and entire folder of docs
 curl -vvv "http://localhost:8080/gdrive/exportFolder?folderId=1myiHJY7U5WDpAzDl7xohs8tf2Yps1FIi"
 ```
+
+## Run on OpenShift
+
+Create project
+```bash
+oc new-project engagements-dev
+```
+
+Deploy elastic cluster
+```bash
+kustomize build elastic/operator | oc apply -f-
+kustomize build elastic | oc apply -f-
+```
+
+Deploy application
+```bash
+helm repo add eformat https://eformat.github.io/helm-charts
+helm upgrade --install document-loader-service eformat/document-loader-service
+```

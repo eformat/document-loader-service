@@ -8,7 +8,7 @@ replicas:
 image_repository: quay.io
 image_name: document-loader-service
 image_namespace: eformat
-image_version: 1.0.0
+image_version: latest
 # enable image stream in chart
 is:
   enabled: true

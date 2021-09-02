@@ -66,6 +66,8 @@ spec:
                 secretKeyRef:
                   key: gdrive-refresh-token
                   name: {{ include "document-loader-service.fullname" . }}
+            - name: DOWNLOAD_FOLDER
+              value: "/mnt"
           image: ' '
           imagePullPolicy: Always
           name: {{ include "document-loader-service.name" . }}
@@ -115,7 +117,7 @@ spec:
             - -openshift-service-account={{ include "document-loader-service.fullname" . }}
             - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             - -skip-auth-regex=^/metrics
-          image: quay.io/openshift/origin-oauth-proxy:4.6
+          image: quay.io/openshift/origin-oauth-proxy:4.8
           imagePullPolicy: IfNotPresent
           ports:
             - name: oauth-proxy
@@ -131,11 +133,11 @@ spec:
         - name: secret-document-loader-service-tls
           secret:
             defaultMode: 420
-            secretName: document-loader-service-tls
+            secretName: secret-document-loader-service-tls
         - name: secret-document-loader-service-proxy
           secret:
             defaultMode: 420
-            secretName: document-loader-service-proxy
+            secretName: secret-document-loader-service-proxy
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
