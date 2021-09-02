@@ -1,0 +1,14 @@
+{
+  "description" : "What did you hide in this file?",
+  "processors" : [
+    {
+      "attachment" : {
+        "field" : "data",
+        "properties": [ "content", "title" ]
+      },
+      "remove":{
+        "field":"data"
+      }
+    }
+  ]
+}

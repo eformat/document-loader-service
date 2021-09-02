@@ -12,9 +12,9 @@ public class DocumentElasticConverter implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         byte[] doc = exchange.getIn().getBody(byte[].class);
-        // format is: fileId-fileName.ext
+        // format is: fileId-=-fileName.ext
         String fullFileName = exchange.getIn().getHeader(fileNameHeader, String.class);
-        List<String> list = new ArrayList<String>(Arrays.asList(fullFileName.split("-")));
+        List<String> list = new ArrayList<String>(Arrays.asList(fullFileName.split("-=-")));
         String fileId = list.get(0);
         list.remove(0);
         String fileName = String.join("", list);

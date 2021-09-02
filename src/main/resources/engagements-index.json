@@ -1,0 +1,18 @@
+{
+  "mappings": {
+    "properties": {
+      "attachment.content": {
+        "type": "text",
+        "analyzer": "english"
+      }
+    }
+  },
+  "aliases": {
+    "engagements-write": {
+      "is_write_index": true
+    },
+    "engagements-read": {
+      "is_write_index": false
+    }
+  }
+}

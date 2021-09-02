@@ -20,7 +20,7 @@ public class DocumentLoader extends RouteBuilder {
                 .routeId("file-poller")
                 .setHeader("component").constant("elasticsearch-rest-quarkus")
                 .process(new DocumentElasticConverter())
-                .toD("${header.component}://elasticsearch?operation=Index&indexName=engagements")
+                .toD("${header.component}://elasticsearch?operation=Index&indexName=engagements-write")
                 .log("file processed");
     }
 

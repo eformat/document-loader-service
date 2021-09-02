@@ -11,6 +11,7 @@ import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.google.drive.GoogleDriveComponent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
 @Path("gdrive")
+@Tag(name = "Admin")
 public class Downloader {
 
     private final Logger log = LoggerFactory.getLogger(Downloader.class);
@@ -57,7 +59,7 @@ public class Downloader {
             }
             // We don't use export method of camel component, rather shortcut cause we know the feed download url's
             if (response != null) {
-                String fileName = downloadFolder.concat("/" + fileId + "-" + response.getTitle().strip().concat(ext));
+                String fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip().concat(ext));
                 try {
                     HttpResponse resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                             .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
