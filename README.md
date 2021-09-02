@@ -37,6 +37,17 @@ kustomize build elastic/operator | oc apply -f-
 kustomize build elastic | oc apply -f-
 ```
 
+Create Secrets
+```bash
+oc -n engagements-dev create secret generic secret-document-loader-service-proxy --from-literal=session_secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c43)
+
+oc -n engagements-dev create secret generic document-loader-service \
+  --from-literal=elastic-password=$(oc get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d) \
+  --from-literal=gdrive-client-id=${GOOGLE_API_CLIENT_ID} \
+  --from-literal=gdrive-secret=${GOOGLE_API_CLIENT_SECRET} \
+  --from-literal=gdrive-refresh-token=${GOOGLE_API_REFRESH_TOKEN}
+```
+
 Deploy application
 ```bash
 helm repo add eformat https://eformat.github.io/helm-charts
