@@ -1,0 +1,15 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "document-loader-service.fullname" . }}
+  labels:
+    {{- include "document-loader-service.labels" . | nindent 4 }}
+spec:
+  endpoints:
+    - interval: 30s
+      port: tcp-8080
+      scheme: http
+  selector:
+    matchLabels:
+    {{- include "document-loader-service.labels" . | nindent 6 }}

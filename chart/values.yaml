@@ -1,0 +1,21 @@
+# OpenShift objects
+route: true
+# if false use a kube deployment instead
+deploymentConfig: false
+replicas:
+  min: 2
+  max: 2
+image_repository: quay.io
+image_name: document-loader-service
+image_namespace: eformat
+image_version: 1.0.0
+# enable image stream in chart
+is:
+  enabled: true
+# use the image specified above as tag (else tag overridden in pipeline say)
+istag:
+  enabled: true
+# elastic related
+elasticsearch_hosts: engagements-es-http:9200
+elasticsearch_username: elastic
+elasticsearch_protocol: http

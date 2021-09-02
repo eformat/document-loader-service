@@ -1,0 +1,144 @@
+{{- if (ne .Values.deploymentConfig true) }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "document-loader-service.fullname" . }}
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"{{ include "document-loader-service.fullname" . }}:{{ .Values.image_version }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"document-loader-service\")].image"}]'
+  labels:
+    {{- include "document-loader-service.labels" . | nindent 4 }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.replicas.min }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      {{- include "document-loader-service.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '8080'
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        {{- include "document-loader-service.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - env:
+            - name: QUARKUS_PROFILE
+              value: prod
+            - name: QUARKUS_LOG_LEVEL
+              value: INFO
+            - name: QUARKUS_ELASTICSEARCH_HOSTS
+              value: {{ .Values.elasticsearch_hosts | quote }}
+            - name: QUARKUS_ELASTICSEARCH_USERNAME
+              value: {{ .Values.elasticsearch_username | quote }}
+            - name: QUARKUS_ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: elastic-password
+                  name: {{ include "document-loader-service.fullname" . }}
+            - name: QUARKUS_ELASTICSEARCH_PROTOCOL
+              value: {{ .Values.elasticsearch_protocol | quote }}
+            - name: JAVA_MAX_MEM_RATIO
+              value: "50"
+            - name: GOOGLE_API_APPLICATION_NAME
+              value: "gdrive-service/1.0"
+            - name: GOOGLE_API_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: gdrive-client-id
+                  name: {{ include "document-loader-service.fullname" . }}
+            - name: GOOGLE_API_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: gdrive-secret
+                  name: {{ include "document-loader-service.fullname" . }}
+            - name: GOOGLE_API_REFRESH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: gdrive-refresh-token
+                  name: {{ include "document-loader-service.fullname" . }}
+          image: ' '
+          imagePullPolicy: Always
+          name: {{ include "document-loader-service.name" . }}
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: '1000m'
+              memory: 2Gi
+            requests:
+              cpu: '100m'
+              memory: 500Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - name: oauth-proxy
+          args:
+            - -provider=openshift
+            - -https-address=:8888
+            - -http-address=
+            - -email-domain=*
+            - -upstream=http://localhost:8080
+            - -tls-cert=/etc/tls/private/tls.crt
+            - -tls-key=/etc/tls/private/tls.key
+            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+            - -cookie-secret-file=/etc/proxy/secrets/session_secret
+            - -openshift-service-account={{ include "document-loader-service.fullname" . }}
+            - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - -skip-auth-regex=^/metrics
+          image: quay.io/openshift/origin-oauth-proxy:4.6
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: oauth-proxy
+              containerPort: 8888
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/tls/private
+              name: secret-document-loader-service-tls
+            - mountPath: /etc/proxy/secrets
+              name: secret-document-loader-service-proxy
+      serviceAccountName: {{ include "document-loader-service.fullname" . }}
+      volumes:
+        - name: secret-document-loader-service-tls
+          secret:
+            defaultMode: 420
+            secretName: document-loader-service-tls
+        - name: secret-document-loader-service-proxy
+          secret:
+            defaultMode: 420
+            secretName: document-loader-service-proxy
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+{{ end }}

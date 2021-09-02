@@ -1,0 +1,11 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "document-loader-service.fullname" . }}
+  labels:
+    {{- include "document-loader-service.labels" . | nindent 4 }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      deploymentconfig: {{ include "document-loader-service.fullname" . }}

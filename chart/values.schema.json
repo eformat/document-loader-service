@@ -1,0 +1,50 @@
+{
+  "title": "\uD83E\uDDA9 Document Loader Application \uD83E\uDDA9",
+  "description": "Document Loader Application",
+  "type": "object",
+  "required": [],
+  "properties": {
+    "deploymentConfig": {
+      "type": "boolean",
+      "title": "Use a DeploymentConfig. Kubernetes Deployment is the default.",
+      "default": false
+    },
+    "image_name": {
+      "type": "string",
+      "title": "Image Name",
+      "default": "document-loader-service",
+      "minLength": 3
+    },
+    "image_namespace": {
+      "type": "string",
+      "title": "Image Namespace",
+      "default": "labs-ci-cd",
+      "examples": [
+        "dev",
+        "test",
+        "staging"
+      ],
+      "minLength": 3
+    },
+    "image_repository": {
+      "type": "string",
+      "title": "Image Repository",
+      "default": "image-registry.openshift-image-registry.svc:5000",
+      "examples": [
+        "image-registry.openshift-image-registry.svc:5000",
+        "quay.io"
+      ],
+      "minLength": 3
+    },
+    "image_version": {
+      "type": "string",
+      "title": "Image Version",
+      "default": "latest",
+      "minLength": 3
+    },
+    "replicas": {
+      "type": "object",
+      "title": "Replicas"
+    }
+  }
+}
