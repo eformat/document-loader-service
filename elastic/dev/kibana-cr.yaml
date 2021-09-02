@@ -6,7 +6,7 @@ metadata:
 spec:
   count: 1
   elasticsearchRef:
-    name: address
+    name: engagements
   version: 7.14.0
   podTemplate:
     metadata:
