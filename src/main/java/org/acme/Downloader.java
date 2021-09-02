@@ -70,9 +70,12 @@ public class Downloader {
                         resp.download(fileOutputStream);
                     }
                 } catch (IOException e) {
+                    log.warn(">>> Something wrong, failed to write fileId: " + fileId);
                     return Response.status(Response.Status.NOT_FOUND).build();
                 }
                 return Response.ok(fileName).build();
+            } else {
+                log.warn(">>> Something wrong, could not find fileId: " + fileId);
             }
             return Response.status(Response.Status.NOT_FOUND).build();
 
