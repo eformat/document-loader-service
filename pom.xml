@@ -38,6 +38,10 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-vertx</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel.quarkus</groupId>
             <artifactId>camel-quarkus-elasticsearch-rest</artifactId>
         </dependency>

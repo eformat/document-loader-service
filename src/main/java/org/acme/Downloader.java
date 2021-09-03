@@ -6,6 +6,8 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.ChildList;
 import com.google.api.services.drive.model.File;
+import io.quarkus.vertx.ConsumeEvent;
+import io.vertx.core.eventbus.EventBus;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
@@ -35,6 +37,9 @@ public class Downloader {
 
     @Inject
     ProducerTemplate producerTemplate;
+
+    @Inject
+    EventBus bus;
 
     private static Drive getClient(CamelContext context) {
         GoogleDriveComponent component = context.getComponent("google-drive", GoogleDriveComponent.class);
@@ -115,23 +120,23 @@ public class Downloader {
     @Produces(MediaType.TEXT_PLAIN)
     public Response exportFolder(@QueryParam("folderId") String folderId) {
         log.info(">>> exportFolder: " + folderId);
+        ChildList response = producerTemplate.requestBody("google-drive://drive-children/list?inBody=folderId", folderId, ChildList.class);
+        if (response != null) {
+            response.getItems().forEach(
+                    child -> bus.<String>request("folder", child.getId())
+            );
+            return Response.ok("Exporting " + response.getItems().size() + " documents async OK").build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+
+    @ConsumeEvent(value = "folder", blocking = true)
+    public void consumeTest(String folderId) throws InterruptedException {
         try {
-            ChildList response = producerTemplate.requestBody("google-drive://drive-children/list?inBody=folderId", folderId, ChildList.class);
-            if (response != null) {
-                response.getItems().forEach(
-                        child -> exportFile(child.getId(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-                );
-                return Response.ok("Exported " + response.getItems().size() + " documents OK").build();
-            } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
+            exportFile(folderId, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         } catch (CamelExecutionException e) {
-            Exception exchangeException = e.getExchange().getException();
-            if (exchangeException != null && exchangeException.getCause() instanceof GoogleJsonResponseException) {
-                GoogleJsonResponseException originalException = (GoogleJsonResponseException) exchangeException.getCause();
-                return Response.status(originalException.getStatusCode()).build();
-            }
-            throw e;
+            log.warn("Caught " + e);
         }
     }
 }
