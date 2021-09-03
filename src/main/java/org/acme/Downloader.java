@@ -53,35 +53,38 @@ public class Downloader {
         log.info(">>> exportFile: " + fileId);
         try {
             File response = producerTemplate.requestBody("google-drive://drive-files/get?inBody=fileId", fileId, File.class);
-            String ext = null;
-            switch (mimeType) {
-                case ("application/pdf"):
-                    ext = ".pdf";
-                    break;
-                case ("application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
-                default:
-                    ext = ".docx";
-            }
-            // We don't use export method of camel component, rather shortcut cause we know the feed download url's
             if (response != null) {
-                String fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip().concat(ext));
+                String ext = null;
+                HttpResponse resp = null;
+                // We don't use export method of camel component, rather shortcut cause we know the feed download url's
                 try {
-                    HttpResponse resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
-                            .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
-
+                    switch (mimeType) {
+                        case ("application/pdf"):
+                            ext = ".pdf";
+                            resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
+                                    .buildGetRequest(new GenericUrl("https://www.googleapis.com/drive/v2/files/" + fileId + "?alt=media&source=downloadUrl")).execute();
+                            break;
+                        case ("application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
+                        default:
+                            ext = ".docx";
+                            resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
+                                    .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
+                    }
+                    String fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip().concat(ext));
                     try (FileOutputStream fileOutputStream = new FileOutputStream(fileName);
                          FileChannel channel = fileOutputStream.getChannel();
                          FileLock lock = channel.lock()) {
                         resp.download(fileOutputStream);
                     }
+
+                    return Response.ok(fileName).build();
+
                 } catch (IOException e) {
                     log.warn(">>> Something wrong, failed to write fileId: " + fileId);
                     return Response.status(Response.Status.NOT_FOUND).build();
                 }
-                return Response.ok(fileName).build();
-            } else {
-                log.warn(">>> Something wrong, could not find fileId: " + fileId);
             }
+            log.warn(">>> Something wrong, could not find fileId: " + fileId);
             return Response.status(Response.Status.NOT_FOUND).build();
 
         } catch (CamelExecutionException e) {
