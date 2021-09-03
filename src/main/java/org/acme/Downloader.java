@@ -49,7 +49,7 @@ public class Downloader {
     @Path("exportFile")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response exportFile(@QueryParam("fileId") String fileId, @QueryParam("mimeType") @DefaultValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document") String mimeType) {
+    public Response exportFile(@QueryParam("fileId") String fileId) {
         log.info(">>> exportFile: " + fileId);
         try {
             File response = producerTemplate.requestBody("google-drive://drive-files/get?inBody=fileId", fileId, File.class);
@@ -59,25 +59,27 @@ public class Downloader {
                 String fileName = null;
                 // We don't use export method of camel component, rather shortcut cause we know the feed download url's
                 try {
-                    switch (mimeType) {
+                    switch (response.getMimeType()) {
                         case ("application/pdf"):
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://www.googleapis.com/drive/v2/files/" + fileId + "?alt=media&source=downloadUrl")).execute();
                             fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip());
                             break;
-                        case ("application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
-                        default:
+                        case ("application/vnd.google-apps.document"):
                             ext = ".docx";
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
                             fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip().concat(ext));
+                            break;
+                        default:
+                            log.warn(">>> Unsupported mimeType: " + response.getMimeType());
+                            return Response.status(Response.Status.BAD_REQUEST).build();
                     }
                     try (FileOutputStream fileOutputStream = new FileOutputStream(fileName);
                          FileChannel channel = fileOutputStream.getChannel();
                          FileLock lock = channel.lock()) {
                         resp.download(fileOutputStream);
                     }
-
                     return Response.ok(fileName).build();
 
                 } catch (IOException e) {
@@ -138,7 +140,7 @@ public class Downloader {
     @ConsumeEvent(value = "folder", blocking = true)
     public void consumeFolder(String folderId) throws InterruptedException {
         try {
-            exportFile(folderId, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            exportFile(folderId);
         } catch (CamelExecutionException e) {
             log.warn("Caught " + e);
         }
