@@ -54,7 +54,6 @@ public class Downloader {
         try {
             File response = producerTemplate.requestBody("google-drive://drive-files/get?inBody=fileId", fileId, File.class);
             if (response != null) {
-                String ext = null;
                 HttpResponse resp = null;
                 String fileName = null;
                 // We don't use export method of camel component, rather shortcut cause we know the feed download url's
@@ -66,7 +65,7 @@ public class Downloader {
                             fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip());
                             break;
                         case ("application/vnd.google-apps.document"):
-                            ext = ".docx";
+                            String ext = ".docx";
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
                             fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip().concat(ext));
