@@ -132,7 +132,7 @@ public class Downloader {
     }
 
     @ConsumeEvent(value = "folder", blocking = true)
-    public void consumeTest(String folderId) throws InterruptedException {
+    public void consumeFolder(String folderId) throws InterruptedException {
         try {
             exportFile(folderId, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         } catch (CamelExecutionException e) {
