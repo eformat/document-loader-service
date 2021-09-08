@@ -83,13 +83,13 @@ public class Downloader {
                         case ("application/pdf"):
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://www.googleapis.com/drive/v2/files/" + fileId + "?alt=media&source=downloadUrl")).execute();
-                            fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip());
+                            fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().replaceAll("[^a-zA-Z0-9\\.\\-]", "_").strip());
                             break;
                         case ("application/vnd.google-apps.document"):
                             String ext = ".docx";
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
-                            fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().strip().concat(ext));
+                            fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().replaceAll("[^a-zA-Z0-9\\.\\-]", "_").strip().concat(ext));
                             break;
                         default:
                             log.warn(">>> Unsupported mimeType: " + response.getMimeType());
@@ -103,7 +103,7 @@ public class Downloader {
                     return Response.ok(fileName).build();
 
                 } catch (IOException e) {
-                    log.warn(">>> Something wrong, failed to write fileId: " + fileId);
+                    log.warn(">>> Something wrong, failed to write fileId: " + fileId + " " + fileName);
                     return Response.status(Response.Status.NOT_FOUND).build();
                 }
             }

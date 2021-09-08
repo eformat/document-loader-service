@@ -35,10 +35,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -96,13 +93,9 @@ public class IndexResource {
             numReplicas = "1";
         }
         // ingest pipeline configuration
-        String pipeline = null;
-        try (InputStream inputStream = IndexResource.class.getClassLoader().getResourceAsStream("engagements-ingest-pipeline.json");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            pipeline = reader.lines()
-                    .collect(Collectors.joining(System.lineSeparator()));
-        } catch (IOException e) {
-            JsonObject reason = new JsonObject().put("reason", "Failed to read engagements-ingest-pipeline.json " + e);
+        String pipeline = ApplicationUtils.readFile("engagements-ingest-pipeline.json");
+        if (null == pipeline) {
+            JsonObject reason = new JsonObject().put("reason", "Failed to read engagements-ingest-pipeline.json");
             reason.put("indexName", sourceIndex);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(reason).build();
         }
@@ -146,27 +139,23 @@ public class IndexResource {
         indexName = sourceIndex + "-" + postfix;
 
         // create index configuration
-        String index = null;
-        try (InputStream inputStream = IndexResource.class.getClassLoader().getResourceAsStream("engagements-index.json");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            index = reader.lines()
-                    .collect(Collectors.joining(System.lineSeparator()));
-            // dont create aliases if we are not deleting
-            if (delete == false && previousName != null) {
-                JsonObject indexObject = new JsonObject(index);
-                _removeJson(indexObject, "aliases");
-                index = indexObject.toString();
-            }
-            if ((delete == true) && previousName != null) { // increment and delete, make sure we don't create two read index's
-                JsonObject indexObject = new JsonObject(index);
-                _removeJson(indexObject, "aliases." + sourceIndex + "-read");
-                index = indexObject.toString();
-            }
-        } catch (IOException e) {
-            log.warn(">>> Failed to read file " + e);
-            JsonObject reason = new JsonObject().put("reason", "Failed to read file " + e);
+        String index = ApplicationUtils.readFile("engagements-index.json");
+        if (null == index) {
+            log.warn(">>> Failed to read file engagements-index.json");
+            JsonObject reason = new JsonObject().put("reason", "Failed to read file engagements-index.json");
             reason.put("indexName", indexName);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(reason).build();
+        }
+        // dont create aliases if we are not deleting
+        if (delete == false && previousName != null) {
+            JsonObject indexObject = new JsonObject(index);
+            ApplicationUtils.removeJson(indexObject, "aliases");
+            index = indexObject.toString();
+        }
+        if ((delete == true) && previousName != null) { // increment and delete, make sure we don't create two read index's
+            JsonObject indexObject = new JsonObject(index);
+            ApplicationUtils.removeJson(indexObject, "aliases." + sourceIndex + "-read");
+            index = indexObject.toString();
         }
         CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
         createIndexRequest.source(
@@ -545,37 +534,4 @@ public class IndexResource {
         return Response.ok(reason).build();
     }
 
-    // _removeJosn(jsonObject, "ab.g");
-    private static void _removeJson(JsonObject jsonObject, String key) {
-        if (key.contains(".")) {
-            String innerKey = key.substring(0, key.indexOf("."));
-            String remaining = key.substring(key.indexOf(".") + 1);
-            if (jsonObject.containsKey(innerKey)) {
-                _removeJson(jsonObject.getJsonObject(innerKey), remaining);
-            } else {
-                JsonObject innerJson = new JsonObject();
-                jsonObject.put(innerKey, innerJson);
-                _removeJson(innerJson, remaining);
-            }
-        } else {
-            jsonObject.remove(key);
-        }
-    }
-
-    // _addJson(jsonObject, "ab.g", "foo2");
-    private static void _addJson(JsonObject jsonObject, String key, String value) {
-        if (key.contains(".")) {
-            String innerKey = key.substring(0, key.indexOf("."));
-            String remaining = key.substring(key.indexOf(".") + 1);
-            if (jsonObject.containsKey(innerKey)) {
-                _addJson(jsonObject.getJsonObject(innerKey), remaining, value);
-            } else {
-                JsonObject innerJson = new JsonObject();
-                jsonObject.put(innerKey, innerJson);
-                _addJson(innerJson, remaining, value);
-            }
-        } else {
-            jsonObject.put(key, value);
-        }
-    }
 }

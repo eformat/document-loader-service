@@ -22,6 +22,8 @@ public class DocumentElasticConverter implements Processor {
         map.put("data", doc);
         map.put("filename", fileName);
         map.put("url", "https://docs.google.com/document/d/" + fileId + "/edit");
+        map.put("fileId", fileId);
         exchange.getIn().setBody(map);
     }
+
 }

@@ -16,12 +16,19 @@ public class DocumentLoader extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+        // only load the same fileId once
+        onException(FileExistsException.class)
+                .log("fileId exists in elastic, ignoring")
+                .handled(true);
+
         from("file://".concat(downloadFolder) + "?synchronous=true&delete=true&readLock=fileLock&delay=3000&include=.*.docx|.*.pdf")
                 .routeId("file-poller")
                 .setHeader("component").constant("elasticsearch-rest-quarkus")
                 .process(new DocumentElasticConverter())
+                .process(new DocumentExistsCheck())
                 .toD("${header.component}://elasticsearch?operation=Index&indexName=engagements-write")
                 .log("file processed");
+
     }
 
     @Named("elasticsearch-rest-quarkus")
