@@ -25,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Path("gdrive")
 @Tag(name = "Admin")
@@ -44,6 +46,25 @@ public class Downloader {
     private static Drive getClient(CamelContext context) {
         GoogleDriveComponent component = context.getComponent("google-drive", GoogleDriveComponent.class);
         return component.getClient(component.getConfiguration());
+    }
+
+    @Path("export")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response export(@QueryParam("url") String url) {
+        Pattern pattern = Pattern.compile("(https?://)([^:^/]*)(:\\d*)?(.*)/([a-zA-Z0-9_]*)([\\?]+.*)?$");
+        Matcher matcher = pattern.matcher(url);
+        if (matcher.find()) {
+            String id = matcher.group(5);
+            log.info(">>> id " + id);
+            if (url.contains("folder")) {
+                return exportFolder(id);
+            } else if (url.contains("document")) {
+                return exportFile(id);
+            }
+        }
+        log.warn(">>> url should contain google folder or document");
+        return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
     @Path("exportFile")
@@ -102,7 +123,7 @@ public class Downloader {
     @Path("folderList")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response readFolder(@QueryParam("folderId") String folderId) {
+    public Response folderList(@QueryParam("folderId") String folderId) {
         try {
             ChildList response = producerTemplate.requestBody("google-drive://drive-children/list?inBody=folderId", folderId, ChildList.class);
             if (response != null) {
