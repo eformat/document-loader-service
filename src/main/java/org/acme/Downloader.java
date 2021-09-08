@@ -52,7 +52,7 @@ public class Downloader {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public Response export(@QueryParam("url") String url) {
-        Pattern pattern = Pattern.compile("(https?://)([^:^/]*)(:\\d*)?(.*)/([a-zA-Z0-9_]*)([\\?]+.*)?$");
+        Pattern pattern = Pattern.compile("(https?://)([^:^/]*)(:\\d*)?(.*)/([a-zA-Z0-9_-]*)$");
         Matcher matcher = pattern.matcher(url);
         if (matcher.find()) {
             String id = matcher.group(5);
