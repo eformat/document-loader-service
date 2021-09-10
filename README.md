@@ -22,6 +22,8 @@ Test
 curl -vvv http://localhost:8080/gdrive/exportFile?fileId=1WIDbZg7VN8N97P_0hU5JD89ESYZKpZoMR3tNhOaeHrc
 # export and entire folder of docs
 curl -vvv "http://localhost:8080/gdrive/exportFolder?folderId=1myiHJY7U5WDpAzDl7xohs8tf2Yps1FIi"
+# let the app dowload by url (file or folder)
+curl -vvv "http://localhost:8080/gdrive/export?url=https://drive.google.com/drive/folders/1yoQdWMCVcE-gvpvUM2u8dSDqMWLcL67S"
 ```
 
 ## Run on OpenShift
