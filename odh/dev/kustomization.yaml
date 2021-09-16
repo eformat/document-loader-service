@@ -1,0 +1,4 @@
+namespace: engagements-dev
+
+resources:
+- kfdef-cr.yaml

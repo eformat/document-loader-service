@@ -44,6 +44,13 @@ To Login to Kibana password (user is `elastic`)
 echo $(oc get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d)
 ```
 
+Deploy OpenDataHub and Trino:
+```bash
+oc new-project opendatahub-trino
+kustomize build odh/operator | oc apply -f-
+kustomize build odh | oc apply -f-
+```
+
 Create Secrets
 ```bash
 oc -n engagements-dev create secret generic secret-document-loader-service-proxy --from-literal=session_secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c43)
