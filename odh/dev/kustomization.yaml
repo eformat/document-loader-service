@@ -1,4 +1,4 @@
-namespace: engagements-dev
+namespace: opendatahub-trino
 
 resources:
 - kfdef-cr.yaml

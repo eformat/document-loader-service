@@ -36,7 +36,7 @@ oc new-project engagements-dev
 Deploy elastic cluster
 ```bash
 kustomize build elastic/operator | oc apply -f-
-kustomize build elastic | oc apply -f-
+kustomize build elastic | oc -n engagements-dev apply -f-
 ```
 
 To Login to Kibana password (user is `elastic`)
@@ -48,7 +48,7 @@ Deploy OpenDataHub and Trino:
 ```bash
 oc new-project opendatahub-trino
 kustomize build odh/operator | oc apply -f-
-kustomize build odh | oc apply -f-
+kustomize build odh | oc -n opendatahub-trino apply -f-
 ```
 
 Create Secrets
@@ -56,7 +56,7 @@ Create Secrets
 oc -n engagements-dev create secret generic secret-document-loader-service-proxy --from-literal=session_secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c43)
 
 oc -n engagements-dev create secret generic document-loader-service \
-  --from-literal=elastic-password=$(oc get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d) \
+  --from-literal=elastic-password=$(oc -n engagements-dev get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d) \
   --from-literal=gdrive-client-id=${GOOGLE_API_CLIENT_ID} \
   --from-literal=gdrive-secret=${GOOGLE_API_CLIENT_SECRET} \
   --from-literal=gdrive-refresh-token=${GOOGLE_API_REFRESH_TOKEN}
@@ -65,5 +65,5 @@ oc -n engagements-dev create secret generic document-loader-service \
 Deploy application
 ```bash
 helm repo add eformat https://eformat.github.io/helm-charts
-helm upgrade --install document-loader-service eformat/document-loader-service
+helm upgrade --install document-loader-service eformat/document-loader-service --namespace engagements-dev 
 ```
