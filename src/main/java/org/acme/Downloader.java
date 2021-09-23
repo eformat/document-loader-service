@@ -18,7 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.FileOutputStream;
@@ -51,16 +54,16 @@ public class Downloader {
     @Path("export")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response export(@QueryParam("url") String url) {
+    public Response export(@QueryParam("url") String url, @QueryParam("uuid") String uuid, @QueryParam("project") String project) {
         Pattern pattern = Pattern.compile("(https?://)([^:^/]*)(:\\d*)?(.*)/([a-zA-Z0-9_-]*)$");
         Matcher matcher = pattern.matcher(url);
         if (matcher.find()) {
             String id = matcher.group(5);
             log.info(">>> id " + id);
             if (url.contains("folder")) {
-                return exportFolder(id);
+                return exportFolder(id, uuid, project);
             } else if (url.contains("document")) {
-                return exportFile(id);
+                return exportFile(id, uuid, project);
             }
         }
         log.warn(">>> url should contain google folder or document");
@@ -70,7 +73,7 @@ public class Downloader {
     @Path("exportFile")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response exportFile(@QueryParam("fileId") String fileId) {
+    public Response exportFile(@QueryParam("fileId") String fileId, @QueryParam("uuid") String uuid, @QueryParam("project") String project) {
         log.info(">>> exportFile: " + fileId);
         try {
             File response = producerTemplate.requestBody("google-drive://drive-files/get?inBody=fileId", fileId, File.class);
@@ -83,13 +86,13 @@ public class Downloader {
                         case ("application/pdf"):
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://www.googleapis.com/drive/v2/files/" + fileId + "?alt=media&source=downloadUrl")).execute();
-                            fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().replaceAll("[^a-zA-Z0-9\\.\\-]", "_").strip());
+                            fileName = downloadFolder.concat("/" + project + "-=-" + uuid + "-=-" +  fileId + "-=-" + response.getTitle().replaceAll("[^a-zA-Z0-9\\.\\-]", "_").strip());
                             break;
                         case ("application/vnd.google-apps.document"):
                             String ext = ".docx";
                             resp = getClient(producerTemplate.getCamelContext()).getRequestFactory()
                                     .buildGetRequest(new GenericUrl("https://docs.google.com/feeds/download/documents/export/Export?id=" + fileId + "&exportFormat=" + ext.substring(1))).execute();
-                            fileName = downloadFolder.concat("/" + fileId + "-=-" + response.getTitle().replaceAll("[^a-zA-Z0-9\\.\\-]", "_").strip().concat(ext));
+                            fileName = downloadFolder.concat("/" + project + "-=-" + uuid + "-=-" + fileId + "-=-" + response.getTitle().replaceAll("[^a-zA-Z0-9\\.\\-]", "_").strip().concat(ext));
                             break;
                         default:
                             log.warn(">>> Unsupported mimeType: " + response.getMimeType());
@@ -144,12 +147,12 @@ public class Downloader {
     @Path("exportFolder")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response exportFolder(@QueryParam("folderId") String folderId) {
+    public Response exportFolder(@QueryParam("folderId") String folderId, @QueryParam("uuid") String uuid, @QueryParam("project") String project) {
         log.info(">>> exportFolder: " + folderId);
         ChildList response = producerTemplate.requestBody("google-drive://drive-children/list?inBody=folderId", folderId, ChildList.class);
         if (response != null) {
             response.getItems().forEach(
-                    child -> bus.<String>request("folder", child.getId())
+                    child -> bus.<String>request("folder", new FolderID(child.getId(), uuid, project))
             );
             return Response.ok("Exporting " + response.getItems().size() + " documents async OK").build();
         } else {
@@ -158,11 +161,23 @@ public class Downloader {
     }
 
     @ConsumeEvent(value = "folder", blocking = true)
-    public void consumeFolder(String folderId) throws InterruptedException {
+    public void consumeFolder(FolderID f) throws InterruptedException {
         try {
-            exportFile(folderId);
+            exportFile(f.id, f.uuid, f.project);
         } catch (CamelExecutionException e) {
             log.warn("Caught " + e);
+        }
+    }
+
+    public class FolderID {
+        public String id;
+        public String uuid;
+        public String project;
+
+        FolderID(String id, String uuid, String project) {
+            this.id = id;
+            this.uuid = uuid;
+            this.project = project;
         }
     }
 }

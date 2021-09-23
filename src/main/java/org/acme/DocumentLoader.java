@@ -28,7 +28,6 @@ public class DocumentLoader extends RouteBuilder {
                 .process(new DocumentExistsCheck())
                 .toD("${header.component}://elasticsearch?operation=Index&indexName=engagements-write")
                 .log("file processed");
-
     }
 
     @Named("elasticsearch-rest-quarkus")
