@@ -41,7 +41,7 @@ kustomize build elastic | oc -n engagements-dev apply -f-
 
 To Login to Kibana password (user is `elastic`)
 ```bash
-echo $(oc get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d)
+echo $(oc -n engagements-dev get secret engagements-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 -d)
 ```
 
 Deploy OpenDataHub and Trino:
