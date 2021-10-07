@@ -89,8 +89,8 @@ public class IndexResource {
         if (numReplicas == null || numReplicas.isEmpty()) {
             numReplicas = "1";
         }
-        if (numReplicas == null || numReplicas.isEmpty()) {
-            numReplicas = "1";
+        if (numShards == null || numShards.isEmpty()) {
+            numShards = "1";
         }
         // ingest pipeline configuration
         String pipeline = ApplicationUtils.readFile("engagements-ingest-pipeline.json");
@@ -167,7 +167,7 @@ public class IndexResource {
                 .settings(Settings.builder()
                         .put("index.max_ngram_diff", 50)
                         .put("index.number_of_replicas", Integer.parseInt(numReplicas))
-                        .put("index.number_of_shards", Integer.parseInt(numReplicas))
+                        .put("index.number_of_shards", Integer.parseInt(numShards))
                         .put("index.default_pipeline", "engagements-default-pipeline"));
         // delete and recreate
         try {
