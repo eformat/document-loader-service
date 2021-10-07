@@ -74,7 +74,7 @@ public class IndexResource {
     public Response recreateIndex(
             @Parameter(description = "The source index name to create. Excludes the postfix version e.g. -000001", required = true, schema = @Schema(type = SchemaType.STRING)) @DefaultValue("engagements") @PathParam("sourceIndex") String sourceIndex,
             @Parameter(description = "The number of shards to create.", required = true, schema = @Schema(type = SchemaType.STRING)) @DefaultValue("1") @PathParam("numShards") String numShards,
-            @Parameter(description = "The number of replicas to create.", required = true, schema = @Schema(type = SchemaType.STRING)) @DefaultValue("1") @PathParam("numReplicas") String numReplicas,
+            @Parameter(description = "The number of replicas to create.", required = true, schema = @Schema(type = SchemaType.STRING)) @DefaultValue("0") @PathParam("numReplicas") String numReplicas,
             @Parameter(description = "Delete the index if it exists.", required = true, schema = @Schema(type = SchemaType.BOOLEAN)) @DefaultValue("false") @PathParam("delete") Boolean delete
     ) {
         // we only support engagements indexes

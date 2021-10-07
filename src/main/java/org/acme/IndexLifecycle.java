@@ -21,7 +21,7 @@ public class IndexLifecycle {
     void onStart(@Observes StartupEvent ev) {
         Response response = indexResource.count("engagements-read");
         if (onStart && response.getStatus() != Response.Status.OK.getStatusCode()) {
-            indexResource.recreateIndex("engagements", "1", "1", false);
+            indexResource.recreateIndex("engagements", "1", "0", false);
         }
     }
 
