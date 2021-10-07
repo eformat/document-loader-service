@@ -1,0 +1,21 @@
+---
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: opendatahub-trino
+spec:
+  applications:
+    - kustomizeConfig:
+        overlays:
+          - ml-workshop
+        parameters:
+        repoRef:
+          name: manifests
+          path: trino
+      name: trino
+  repos:
+    - name: kf-manifests
+      uri: https://github.com/kubeflow/manifests/archive/v1.2-branch.tar.gz
+    - name: manifests
+      uri: https://github.com/eformat/odh-manifests/tarball/master
+  version: master

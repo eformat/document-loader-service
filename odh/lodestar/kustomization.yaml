@@ -1,0 +1,4 @@
+namespace: lodestar-search
+
+resources:
+- kfdef-cr.yaml
