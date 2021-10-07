@@ -1,0 +1,6 @@
+namespace: lodestar-search
+
+resources:
+- elastic-cr.yaml
+- kibana-cr.yaml
+- routes.yaml

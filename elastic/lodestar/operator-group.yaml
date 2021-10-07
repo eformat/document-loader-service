@@ -1,0 +1,9 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  name: engagements-apps
+spec:
+  targetNamespaces:
+    {{- list .Release.Namespace | toYaml | nindent 4 }}
