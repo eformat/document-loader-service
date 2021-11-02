@@ -7,7 +7,7 @@ spec:
   applications:
     - kustomizeConfig:
         overlays:
-          - ml-workshop
+          - lodestar-search
         parameters:
         repoRef:
           name: manifests
