@@ -19,3 +19,5 @@ istag:
 elasticsearch_hosts: engagements-es-http:9200
 elasticsearch_username: elastic
 elasticsearch_protocol: http
+# app logs
+log.level: INFO
