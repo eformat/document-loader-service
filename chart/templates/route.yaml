@@ -15,7 +15,7 @@ spec:
     weight: 100
   tls:
     insecureEdgeTerminationPolicy: Redirect
-    termination: reencrypt
+    termination: edge
   wildcardPolicy: None
 status:
   ingress:
