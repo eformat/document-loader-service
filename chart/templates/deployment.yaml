@@ -35,7 +35,7 @@ spec:
             - name: QUARKUS_PROFILE
               value: prod
             - name: QUARKUS_LOG_LEVEL
-              value: {{ .Values.log.level }}
+              value: {{ .Values.log_level }}
             - name: QUARKUS_ELASTICSEARCH_HOSTS
               value: {{ .Values.elasticsearch_hosts | quote }}
             - name: QUARKUS_ELASTICSEARCH_USERNAME
