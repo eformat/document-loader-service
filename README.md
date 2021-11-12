@@ -1,12 +1,12 @@
 # document-loader-service
 
-- Downloads documents (or folders of documents) from Google Drive
+- Download documents (or folders of documents) from Google Drive
 - Imports them into Elasticsearch
 
 ## Run Locally
 
 Export in your environment:
-```json
+```bash
 export DOWNLOAD_FOLDER=/tmp/foo
 export GOOGLE_API_APPLICATION_NAME=gdrive-service/1.0
 export GOOGLE_API_CLIENT_ID=<client id>
@@ -32,7 +32,7 @@ Test
 curl -vvv http://localhost:8080/gdrive/exportFile?fileId=1WIDbZg7VN8N97P_0hU5JD89ESYZKpZoMR3tNhOaeHrc
 # export and entire folder of docs
 curl -vvv "http://localhost:8080/gdrive/exportFolder?folderId=1myiHJY7U5WDpAzDl7xohs8tf2Yps1FIi"
-# let the app dowload by url (file or folder)
+# let the app download by url (file or folder)
 curl -vvv "http://localhost:8080/gdrive/export?url=https://drive.google.com/drive/folders/1yoQdWMCVcE-gvpvUM2u8dSDqMWLcL67S"
 ```
 
