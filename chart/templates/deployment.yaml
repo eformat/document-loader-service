@@ -103,27 +103,27 @@ spec:
               memory: 500Mi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-        - name: oauth-proxy
-          args:
-            - -provider=openshift
-            - -https-address=:8888
-            - -http-address=
-            - -email-domain=*
-            - -upstream=http://localhost:8080
-            - -tls-cert=/etc/tls/private/tls.crt
-            - -tls-key=/etc/tls/private/tls.key
-            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
-            - -cookie-secret-file=/etc/proxy/secrets/session_secret
-            - -openshift-service-account={{ include "document-loader-service.fullname" . }}
-            - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-            - -skip-auth-regex=^/q/metrics
-            - -pass-user-bearer-token=true
-          image: quay.io/openshift/origin-oauth-proxy:4.8
-          imagePullPolicy: IfNotPresent
-          ports:
-            - name: oauth-proxy
-              containerPort: 8888
-              protocol: TCP
+#        - name: oauth-proxy
+#          args:
+#            - -provider=openshift
+#            - -https-address=:8888
+#            - -http-address=
+#            - -email-domain=*
+#            - -upstream=http://localhost:8080
+#            - -tls-cert=/etc/tls/private/tls.crt
+#            - -tls-key=/etc/tls/private/tls.key
+#            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+#            - -cookie-secret-file=/etc/proxy/secrets/session_secret
+#            - -openshift-service-account={{ include "document-loader-service.fullname" . }}
+#            - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+#            - -skip-auth-regex=^/q/metrics
+#            - -pass-user-bearer-token=true
+#          image: quay.io/openshift/origin-oauth-proxy:4.8
+#          imagePullPolicy: IfNotPresent
+#          ports:
+#            - name: oauth-proxy
+#              containerPort: 8888
+#              protocol: TCP
           volumeMounts:
             - mountPath: /etc/tls/private
               name: secret-document-loader-service-tls

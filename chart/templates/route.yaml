@@ -8,7 +8,7 @@ metadata:
     {{- include "document-loader-service.labels" . | nindent 4 }}
 spec:
   port:
-    targetPort: proxy
+    targetPort: tcp-8080
   to:
     kind: Service
     name: {{ include "document-loader-service.fullname" . }}
