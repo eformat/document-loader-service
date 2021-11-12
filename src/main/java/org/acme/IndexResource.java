@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Path("/index")
+@Tag(name = "Index Admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class IndexResource {
@@ -66,7 +67,6 @@ public class IndexResource {
     @GET
     @Path("/create/{sourceIndex}/{numShards}/{numReplicas}/{delete}")
     @Operation(operationId = "recreate", summary = "recreate index", description = "This operation (re)creates an index. Must set increment=true to add a new index version AND/OR set delete=true to remove old version.", deprecated = false, hidden = false)
-    @Tag(name = "Admin")
     @APIResponse(responseCode = "200", description = "Action successful", content = @Content(schema = @Schema(implementation = Response.class), examples = @ExampleObject(name = "example", value = "{\"reason\": \"Index Name (engagements) recreated OK.\",\"indexName\": \"engagements-000001\"}")))
     @APIResponse(responseCode = "400", description = "Unable to process input", content = @Content(schema = @Schema(implementation = Response.class), examples = @ExampleObject(name = "example", value = "{\"reason\": \"Cowardly, refusing to NOT increment or delete: engagements\",\"indexName\": \"engagements-000001\"}")))
     //@APIResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Response.class)))
@@ -233,7 +233,6 @@ public class IndexResource {
     @GET
     @Path("/switch/write/{sourceIndex}/{targetIndex}")
     @Operation(operationId = "switch", summary = "switch write index alias", description = "This operation switches the write alias", deprecated = false, hidden = false)
-    @Tag(name = "Admin")
     public Response switchWriteIndex(@PathParam("sourceIndex") String sourceIndex,
                                      @PathParam("targetIndex") String targetIndex) {
         if (sourceIndex.isBlank() || targetIndex.isBlank())
@@ -285,7 +284,6 @@ public class IndexResource {
     @GET
     @Path("/switch/read/{targetIndex}")
     @Operation(operationId = "switchForTarget", summary = "switch read index alias to target", description = "This operation switches the read alias given a target only", deprecated = false, hidden = false)
-    @Tag(name = "Admin")
     public Response switchReadIndexForTarget(@PathParam("targetIndex") String targetIndex) {
         if (targetIndex.isBlank())
             return Response.notModified().build();
@@ -347,7 +345,6 @@ public class IndexResource {
     @GET
     @Path("/count/{sourceIndex}")
     @Operation(operationId = "count", summary = "count documents in index", description = "This operation returns the document count in the index", deprecated = false, hidden = false)
-    @Tag(name = "Admin")
     public Response count(@PathParam("sourceIndex") @DefaultValue("engagements-read") String sourceIndex) {
         if (sourceIndex.isBlank())
             return Response.notModified().build();
@@ -371,7 +368,6 @@ public class IndexResource {
 
     @GET
     @Path("/prune/{keep}/{sourceIndex}")
-    @Tag(name = "Admin")
     @Operation(operationId = "prune", summary = "prune indexes", description = "This operation prunes (deletes) engagements indexes, keeping last (n) indexes. Optionally can be passed an index name.", deprecated = false, hidden = false)
     @APIResponse(responseCode = "200", description = "Action successful", content = @Content(schema = @Schema(implementation = Response.class), examples = @ExampleObject(name = "example", value = "{\"reason\": \"Prune Indexes OK.\",\"deleted\": \"[engagements-000003, engagements-000004]\",\"count\": \"2\"}")))
     @APIResponse(responseCode = "400", description = "Unable to process input", content = @Content(schema = @Schema(implementation = Response.class)))
@@ -505,7 +501,6 @@ public class IndexResource {
 
     @GET
     @Path("/aliases")
-    @Tag(name = "Admin")
     @Operation(operationId = "getAliases", summary = "Get All engagements Index Aliases", description = "This operation returns all engagements index aliases.", deprecated = false, hidden = false)
     @APIResponse(responseCode = "200", description = "Action successful", content = @Content(schema = @Schema(implementation = Response.class), examples = @ExampleObject(name = "example", value = "{\"reason\": \"Get Aliases OK.\",\"aliases\": {\"engagements-read\": \"engagements-000001\",\"engagements-write\": \"engagements-000001\"}}")))
     @APIResponse(responseCode = "400", description = "Unable to process input", content = @Content(schema = @Schema(implementation = Response.class)))

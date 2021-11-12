@@ -16,6 +16,16 @@ export GOOGLE_API_REFRESH_TOKEN=<token>
 
 See [OAuth Playground](https://developers.google.com/oauthplayground/) for help with registering client and getting refresh tokens.
 
+Run elastic stack locally
+```bash
+podman-compose up -d
+```
+
+Run application
+```bash
+mvn quarkus:dev
+```
+
 Test
 ```bash
 # exportFile docx format (default)
@@ -24,6 +34,11 @@ curl -vvv http://localhost:8080/gdrive/exportFile?fileId=1WIDbZg7VN8N97P_0hU5JD8
 curl -vvv "http://localhost:8080/gdrive/exportFolder?folderId=1myiHJY7U5WDpAzDl7xohs8tf2Yps1FIi"
 # let the app dowload by url (file or folder)
 curl -vvv "http://localhost:8080/gdrive/export?url=https://drive.google.com/drive/folders/1yoQdWMCVcE-gvpvUM2u8dSDqMWLcL67S"
+```
+
+Load all documents (requires a JWT from lodestar)
+```bash
+curl -vvv XGET "http://localhost:8080/artifact/load/weeklyreports" -H 'accept: */*' -H "Authorization: Bearer ${TOKEN}"
 ```
 
 ## Run on OpenShift
