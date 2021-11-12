@@ -117,6 +117,7 @@ spec:
             - -openshift-service-account={{ include "document-loader-service.fullname" . }}
             - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             - -skip-auth-regex=^/q/metrics
+            - -pass-access-token
           image: quay.io/openshift/origin-oauth-proxy:4.8
           imagePullPolicy: IfNotPresent
           ports:
