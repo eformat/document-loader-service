@@ -7,6 +7,7 @@
 
 Export in your environment:
 ```bash
+export LODESTAR_BACKEND_API_URL=<lodestar backend url>
 export DOWNLOAD_FOLDER=/tmp/foo
 export GOOGLE_API_APPLICATION_NAME=gdrive-service/1.0
 export GOOGLE_API_CLIENT_ID=<client id>
