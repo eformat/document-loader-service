@@ -67,6 +67,38 @@ kustomize build odh/operator | oc apply -f-
 kustomize build odh | oc -n opendatahub-trino apply -f-
 ```
 
+Note: You will need to update the [`trino-catalog-secret.yaml`](https://github.com/eformat/odh-manifests/blob/master/trino/overlays/lodestar-search/trino-catalog-lodestar-sealedsecret.yaml) for ElasticSearch creds and URL in your environment e.g.
+
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-catalog
+stringData:
+  hive.properties: |
+    connector.name=hive-hadoop2
+    hive.metastore.uri=thrift://hive-metastore:9083
+    hive.s3.endpoint=$(s3_endpoint_url_prefix)$(s3_endpoint_url)
+    hive.s3.signer-type=S3SignerType
+    hive.s3.path-style-access=true
+    hive.s3.staging-directory=/tmp
+    hive.s3.ssl.enabled=false
+    hive.s3.sse.enabled=false
+    hive.allow-drop-table=true
+    hive.parquet.use-column-names=true
+    hive.recursive-directories=true
+  elasticsearch.properties: |
+    connector.name=elasticsearch
+    elasticsearch.host=engagements-es-http.<url>
+    elasticsearch.port=9200
+    elasticsearch.default-schema-name=default
+    elasticsearch.auth.user=elastic
+    elasticsearch.auth.password=<elastic password>
+    elasticsearch.tls.enabled=false
+    elasticsearch.security=PASSWORD
+    elasticsearch.ignore-publish-address=true
+```
+
 Create Secrets
 ```bash
 oc -n engagements-dev create secret generic secret-document-loader-service-proxy --from-literal=session_secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c43)

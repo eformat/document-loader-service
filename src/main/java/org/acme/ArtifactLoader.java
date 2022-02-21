@@ -67,7 +67,7 @@ public class ArtifactLoader {
         }
         log.info(">>> loading weekly report artifacts");
         ArrayList<Artifact> artifacts;
-        artifacts = jsonUtils.mapWeeklyReportArtifactResponse(artifactClient.getAllWeeklyReports("artifacts.type=weeklyReport"));
+        artifacts = jsonUtils.mapWeeklyReportArtifactResponse(artifactClient.getAllWeeklyReports("artifacts.type=weeklyReport", 1000, 1));
         processArtifacts(artifacts);
         JsonObject reason = new JsonObject().put(artifacts.size() + " artifacts processed", "OK.");
         return Response.ok().entity(reason).build();

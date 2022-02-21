@@ -19,6 +19,6 @@ public interface ArtifactClient {
 
     @GET
     @Path("/engagements/artifacts")
-    String getAllWeeklyReports(@QueryParam("search") String search);
+    String getAllWeeklyReports(@QueryParam("search") String search, @QueryParam("perPage") @DefaultValue("1000") Integer perPage, @QueryParam("page") @DefaultValue("1") Integer page);
 
 }
